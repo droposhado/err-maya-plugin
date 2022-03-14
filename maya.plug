@@ -1,0 +1,7 @@
+[Core]
+Name = maya
+Module = maya
+
+[Documentation]
+Description = Plugin manage health options (water, coffee).
+

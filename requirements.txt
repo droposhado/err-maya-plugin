@@ -1,0 +1,3 @@
+errbot
+mongoengine
+pymongo[srv]

@@ -1,0 +1,91 @@
+
+on: 
+  push: 
+    branches: main
+
+  pull_request:
+
+name: "Python workflow"
+
+jobs:
+
+  py-best-pratices: 
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        name:
+          - bandit
+          - flake8
+          - isort
+          - pylint
+
+        include: 
+          - name: bandit
+            cmd: |
+              pip install bandit
+              bandit -r . -v
+
+          - name: flake8
+            cmd: |
+              pip install flake8
+              flake8
+
+          - name: isort
+            cmd: |
+              pip install isort
+              isort . -v --check --diff
+
+          - name: pylint
+            cmd: |
+              pip install pylint
+              find . -iname "*.py" -not -name "test_*.py" | xargs pylint
+
+
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.0
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install ${{ matrix.name }}
+        run: pip install ${{ matrix.name }}
+
+      - name: Matrix command
+        run: ${{ matrix.cmd }}
+
+  tests: 
+    runs-on: ubuntu-latest
+    env:
+      ERR_MAYA_MONGODB_UR: "mongodb+srv://localhost/maya?retryWrites=true&w=majority"
+
+    services:
+      mongodb:
+        image: mongo
+        ports:
+        - 27017:27017
+
+    steps:
+
+      - name: checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10.0
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Running tests
+        run: pytest -vv
