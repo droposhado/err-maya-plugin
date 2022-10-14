@@ -10,7 +10,7 @@ from errbot import BotPlugin, botcmd
 ERR_MAYA_MONGODB_URL = os.getenv('ERR_MAYA_MONGODB_URL',
                                  'mongodb://localhost:27017')
 
-ERR_MAYA_CLIENT_NAME = os.getenv('ERR_MAYA_CLIENT_NAME', 'errbot-maya-plugin')
+ERR_MAYA_CLIENT_NAME = os.getenv('ERR_MAYA_CLIENT_NAME', 'err-maya-plugin')
 ERR_MAYA_CLIENT_VERSION = os.getenv('ERR_MAYA_CLIENT_VERSION', '1.0.0')
 
 ERR_MAYA_PROVIDER_NAME = os.getenv('PROVIDER_NAME', 'manual')
