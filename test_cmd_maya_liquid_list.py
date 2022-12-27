@@ -11,7 +11,6 @@ def test_command_list_missing_args(testbot):
 
 def test_command_list_coffee_ok(testbot):
     quantity = 250
-    testbot.pop_message()
     testbot.push_message(f"!maya liquid add coffee {quantity}")
     testbot.pop_message()
     testbot.push_message(f"!maya liquid add coffee {quantity}")
@@ -23,20 +22,19 @@ def test_command_list_coffee_ok(testbot):
 
 
 def test_command_list_water_ok(testbot):
-    quantity = 250
-    testbot.pop_message()
+    quantity = 251
     testbot.push_message(f"!maya liquid add water {quantity}")
     testbot.pop_message()
     testbot.push_message(f"!maya liquid add water {quantity}")
     testbot.pop_message()
     testbot.push_message('!maya liquid list water')
     output = testbot.pop_message()
-    assert "Total 500" in output
+    assert "Total 502" in output
     assert str(quantity) in output
 
 
 def test_command_list_coffee_with_date_param_ok(testbot):
-    quantity = 250
+    quantity = 252
     date = "2022-03-25"
     testbot.push_message(f"!maya liquid add coffee {quantity} {date}T01:01:01Z")
     testbot.pop_message()
@@ -44,12 +42,12 @@ def test_command_list_coffee_with_date_param_ok(testbot):
     testbot.pop_message()
     testbot.push_message(f"!maya liquid list coffee {date}")
     output = testbot.pop_message()
-    assert "Total 500" in output
+    assert "Total 504" in output
     assert str(quantity) in output
 
 
 def test_command_list_water_with_date_param_ok(testbot):
-    quantity = 250
+    quantity = 253
     date = "2022-03-25"
     testbot.push_message(f"!maya liquid add water {quantity} {date}T01:01:01Z")
     testbot.pop_message()
@@ -57,7 +55,7 @@ def test_command_list_water_with_date_param_ok(testbot):
     testbot.pop_message()
     testbot.push_message(f"!maya liquid list water {date}")
     output = testbot.pop_message()
-    assert "Total 500" in output
+    assert "Total 506" in output
     assert str(quantity) in output
 
 
