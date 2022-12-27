@@ -9,11 +9,6 @@ def test_command_list_missing_args(testbot):
     assert "Please use '/maya liquid list <type>'" == testbot.pop_message()
 
 
-def test_command_list_not_supported_type(testbot):
-    testbot.push_message('!maya liquid list notexistliquid')
-    assert "Not supported type" == testbot.pop_message()
-
-
 def test_command_list_coffee_ok(testbot):
     quantity = 250
     testbot.push_message(f"!maya liquid add coffee {quantity}")

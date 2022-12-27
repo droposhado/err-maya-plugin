@@ -9,11 +9,6 @@ def test_command_remove_missing_args(testbot):
     assert "Please use '/maya liquid remove <type> <uuid>'" == testbot.pop_message()
 
 
-def test_command_remove_not_supported_type(testbot):
-    testbot.push_message('!maya liquid remove notexistliquid 00000000')
-    assert "Not supported type" == testbot.pop_message()
-
-
 def test_command_remove_coffee_invalid_uuid(testbot):
     testbot.push_message('!maya liquid remove water 00000000')
     assert "Please use a valid UUID" == testbot.pop_message()

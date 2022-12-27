@@ -24,11 +24,6 @@ def test_command_water_add_invalid_amount(testbot):
     assert "Please enter a valid quantity" == testbot.pop_message()
 
 
-def test_command_notexistliquid_add_not_supported_type(testbot):
-    testbot.push_message('!maya liquid add notexistliquid 250')
-    assert "Not supported type" == testbot.pop_message()
-
-
 def test_command_water_add_ok(testbot):
     quantity = 250
     testbot.push_message(f"!maya liquid add water {quantity}")
