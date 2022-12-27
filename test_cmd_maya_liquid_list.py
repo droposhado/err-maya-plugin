@@ -11,6 +11,7 @@ def test_command_list_missing_args(testbot):
 
 def test_command_list_coffee_ok(testbot):
     quantity = 250
+    testbot.pop_message()
     testbot.push_message(f"!maya liquid add coffee {quantity}")
     testbot.pop_message()
     testbot.push_message(f"!maya liquid add coffee {quantity}")
@@ -23,6 +24,7 @@ def test_command_list_coffee_ok(testbot):
 
 def test_command_list_water_ok(testbot):
     quantity = 250
+    testbot.pop_message()
     testbot.push_message(f"!maya liquid add water {quantity}")
     testbot.pop_message()
     testbot.push_message(f"!maya liquid add water {quantity}")
