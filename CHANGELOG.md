@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0]
+### Added
+- Added field `type`, now liquid are stored in same collection, with no restriction in described in string `type`
+
+### Removed
+- Remove `provider` field from model and in the models already stored.
+
+
 ## [1.0.0]
 ### Added
 - Add docstrings to classes and methods.
@@ -38,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Command `liquid add`, now stores the user data of the Discord sending, based on parameter `msg.frm.*` as `person`, `nick`, `fullname`, `client`, `email` in model `User`.
 - Environment variables now use the `ERR_MAYA_` prefix, to differentiate from duplicate use of other plugins.
+
 
 ## [0.0.1]
 ### Added

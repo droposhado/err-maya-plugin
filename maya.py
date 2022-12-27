@@ -11,10 +11,7 @@ ERR_MAYA_MONGODB_URL = os.getenv('ERR_MAYA_MONGODB_URL',
                                  'mongodb://localhost:27017')
 
 ERR_MAYA_CLIENT_NAME = os.getenv('ERR_MAYA_CLIENT_NAME', 'err-maya-plugin')
-ERR_MAYA_CLIENT_VERSION = os.getenv('ERR_MAYA_CLIENT_VERSION', '1.0.0')
-
-ERR_MAYA_PROVIDER_NAME = os.getenv('PROVIDER_NAME', 'manual')
-ERR_MAYA_PROVIDER_VERSION = os.getenv('PROVIDER_VERSION', None)
+ERR_MAYA_CLIENT_VERSION = os.getenv('ERR_MAYA_CLIENT_VERSION', '1.1.0')
 
 DATETIME_ISO8601_FULL_MASK = '%Y-%m-%dT%H:%M:%SZ'
 DATETIME_ISO8601_SIMPLE_MASK = '%Y-%m-%d'
@@ -36,12 +33,6 @@ class Client(mongoengine.EmbeddedDocument):
     version = mongoengine.StringField()
 
 
-class Provider(mongoengine.EmbeddedDocument):
-    """Store information about provider used"""
-    name = mongoengine.StringField()
-    version = mongoengine.StringField()
-
-
 class LiquidUnit(Enum):
     """Units of liquid"""
     ML = "ml"
@@ -51,27 +42,15 @@ class LiquidUnit(Enum):
 class Liquid(mongoengine.Document):
     """Liquid as base class"""
 
-    meta = {
-        'abstract': True
-    }
-
     date = mongoengine.DateTimeField()
     last_modification = mongoengine.DateTimeField()
     quantity = mongoengine.IntField()
     uuid = mongoengine.UUIDField()
     active = mongoengine.BooleanField()
     client = mongoengine.EmbeddedDocumentField(Client)
-    provider = mongoengine.EmbeddedDocumentField(Provider)
     user = mongoengine.EmbeddedDocumentField(User)
     unit = mongoengine.EnumField(LiquidUnit, default=LiquidUnit.ML)
-
-
-class Water(Liquid):
-    """Water model and collection"""
-
-
-class Coffee(Liquid):
-    """Coffee model and collection"""
+    type = mongoengine.StringField()
 
 
 class MayaPlugin(BotPlugin):
@@ -90,15 +69,6 @@ class MayaPlugin(BotPlugin):
 
         liq_type = args[0].lower()
 
-        if liq_type == "water":
-            liquid = Water
-
-        elif liq_type == "coffee":
-            liquid = Coffee
-
-        else:
-            return "Not supported type"
-
         if len(args) == 2:
             try:
                 now = datetime.datetime.strptime(args[1], DATETIME_ISO8601_SIMPLE_MASK)
@@ -111,7 +81,8 @@ class MayaPlugin(BotPlugin):
         mongoengine.connect(host=ERR_MAYA_MONGODB_URL,
                             uuidRepresentation='standard')
 
-        found_docs = liquid.objects(
+        found_docs = Liquid.objects(
+            type=liq_type,
             date__gt=datetime.datetime(now.year, now.month, now.day, 0, 0, 0),
             date__lt=datetime.datetime(now.year, now.month, now.day, 23, 59, 59))
 
@@ -146,15 +117,6 @@ class MayaPlugin(BotPlugin):
         except ValueError:
             return "Please enter a valid quantity"
 
-        if liq_type == "water":
-            liquid = Water()
-
-        elif liq_type == "coffee":
-            liquid = Coffee()
-
-        else:
-            return "Not supported type"
-
         if len(args) == 3:
             try:
                 now = datetime.datetime.strptime(args[2], DATETIME_ISO8601_FULL_MASK)
@@ -167,21 +129,18 @@ class MayaPlugin(BotPlugin):
         mongoengine.connect(host=ERR_MAYA_MONGODB_URL,
                             uuidRepresentation='standard')
 
+        liquid = Liquid()
         liquid.uuid = uuid.uuid4()
         liquid.quantity = value
         liquid.unit = LiquidUnit.ML
         liquid.date = now
         liquid.last_modification = now
+        liquid.type = liq_type
 
         client = Client()
         client.name = ERR_MAYA_CLIENT_NAME
         client.version = ERR_MAYA_CLIENT_VERSION
         liquid.client = client
-
-        provider = Provider()
-        provider.name = ERR_MAYA_PROVIDER_NAME
-        provider.version = ERR_MAYA_PROVIDER_VERSION
-        liquid.provider = provider
 
         user_info = msg.frm
         user = User()
@@ -212,15 +171,6 @@ class MayaPlugin(BotPlugin):
         liq_type = args[0].lower()
         value = args[1]
 
-        if liq_type == "water":
-            liquid = Water
-
-        elif liq_type == "coffee":
-            liquid = Coffee
-
-        else:
-            return "Not supported type"
-
         try:
             uuid_instance = uuid.UUID(value)
 
@@ -231,7 +181,7 @@ class MayaPlugin(BotPlugin):
         mongoengine.connect(host=ERR_MAYA_MONGODB_URL,
                             uuidRepresentation='standard')
 
-        found_doc = liquid.objects(uuid=uuid_instance).first()
+        found_doc = Liquid.objects(uuid=uuid_instance).first()
         if found_doc is None:
             mongoengine.disconnect()
             return f"UUID {value} to {liq_type} not found"
