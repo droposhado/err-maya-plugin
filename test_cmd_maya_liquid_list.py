@@ -11,26 +11,28 @@ def test_command_list_missing_args(testbot):
 
 def test_command_list_coffee_ok(testbot):
     quantity = 250
-    #testbot.push_message(f"!maya liquid add coffee {quantity}")
-    #testbot.pop_message()
+    testbot.push_message(f"!maya liquid add coffee {quantity}")
+    testbot.pop_message()
     testbot.push_message(f"!maya liquid add coffee {quantity}")
     testbot.pop_message()
     testbot.push_message('!maya liquid list coffee')
     output = testbot.pop_message()
     assert "Total 500" in output
     assert str(quantity) in output
+    testbot.pop_message()
 
 
 def test_command_list_water_ok(testbot):
     quantity = 251
-    #testbot.push_message(f"!maya liquid add water {quantity}")
-    #testbot.pop_message()
+    testbot.push_message(f"!maya liquid add water {quantity}")
+    testbot.pop_message()
     testbot.push_message(f"!maya liquid add water {quantity}")
     testbot.pop_message()
     testbot.push_message('!maya liquid list water')
     output = testbot.pop_message()
     assert "Total 502" in output
     assert str(quantity) in output
+    testbot.pop_message()
 
 
 def test_command_list_coffee_with_date_param_ok(testbot):
