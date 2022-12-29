@@ -48,7 +48,7 @@ class Liquid(mongoengine.Document):
     uuid = mongoengine.UUIDField()
     active = mongoengine.BooleanField()
     client = mongoengine.EmbeddedDocumentField(Client)
-    user = mongoengine.EmbeddedDocumentField(User)
+    #user = mongoengine.EmbeddedDocumentField(User)
     unit = mongoengine.EnumField(LiquidUnit, default=LiquidUnit.ML)
     type = mongoengine.StringField()
 
@@ -143,13 +143,14 @@ class MayaPlugin(BotPlugin):
         liquid.client = client
 
         user_info = msg.frm
-        user = User()
-        user.person = user_info.person
-        user.nick = user_info.nick
-        user.fullname = user_info.fullname
-        user.client = user_info.client
-        user.email = user_info.email
-        liquid.user = user
+        print(user_info)
+        #         user = User()
+        #         user.person = user_info.person
+        #         user.nick = user_info.nick
+        #         user.fullname = user_info.fullname
+        #         user.client = user_info.client
+        #         user.email = user_info.email
+        #         liquid.user = user
 
         liquid.save()
 
