@@ -4,9 +4,8 @@ import os
 import uuid
 
 from errbot import BotPlugin, botcmd
+from model import LiquidModel, engine
 from sqlalchemy.orm import sessionmaker
-
-from model import engine, LiquidModel
 
 ERR_MAYA_CLIENT_NAME = os.getenv('ERR_MAYA_CLIENT_NAME', 'err-maya-plugin')
 ERR_MAYA_CLIENT_VERSION = os.getenv('ERR_MAYA_CLIENT_VERSION', '1.1.0')
