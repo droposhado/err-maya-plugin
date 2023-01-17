@@ -5,10 +5,13 @@ adding and removing in MongoDB using mongoengine, to later generate the storage
 dump and [maya](https://droposhado.org/projects/maya) is a health data collection,
 storage and processing project, where the focus is on the collected data.
 
+- <= 1.1.0 use MongoDB as storage;
+- >= 1.2.0 use PostgreSQL as storage;
+
 ## Requirements
 
-- **pymongo[srv]** is needed by Mongo Atlas (connection string);
-- **mongoengine** is required to persist in MongoDB.
+- **sqlalchemy[postgresql_psycopg2binary]** is need by SQLAlchemy to connect on
+  PostgreSQL.
 
 ## Usage
 

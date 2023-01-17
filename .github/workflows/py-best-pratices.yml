@@ -63,13 +63,22 @@ jobs:
   tests: 
     runs-on: ubuntu-latest
     env:
-      ERR_MAYA_MONGODB_UR: "mongodb+srv://localhost/maya?retryWrites=true&w=majority"
+      ERR_MAYA_DATABASE_URL: "postgresql://maya:maya@localhost:5432/maya"
 
     services:
-      mongodb:
-        image: mongo
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: maya
+          POSTGRES_USER: maya
+          POSTGRES_PASSWORD: maya
         ports:
-        - 27017:27017
+          - 5432:5432/tcp
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
 

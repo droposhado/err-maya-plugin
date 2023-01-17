@@ -1,3 +1,2 @@
 errbot
-mongoengine
-pymongo[srv]
+sqlalchemy[postgresql_psycopg2binary]

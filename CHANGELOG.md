@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0]
+### Changed
+- Storage changed from MongoDB (mongoengine) to PostgreSQL (SQLAlchemy).
+- Discord user data now is `msg.frm.fullname` to `username` field.
+
+
 ## [1.1.0]
 ### Added
 - Added field `type`, now liquid are stored in same collection, with no restriction in described in string `type`

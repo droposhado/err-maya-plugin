@@ -2,13 +2,18 @@
 import datetime
 import os
 import uuid
-from enum import Enum
 
-import mongoengine
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+
 from errbot import BotPlugin, botcmd
 
-ERR_MAYA_MONGODB_URL = os.getenv('ERR_MAYA_MONGODB_URL',
-                                 'mongodb://localhost:27017')
+
+ERR_MAYA_DATABASE_URL = os.getenv('ERR_MAYA_DATABASE_URL',
+                                  'postgresql://maya:maya@localhost:5432/maya')
 
 ERR_MAYA_CLIENT_NAME = os.getenv('ERR_MAYA_CLIENT_NAME', 'err-maya-plugin')
 ERR_MAYA_CLIENT_VERSION = os.getenv('ERR_MAYA_CLIENT_VERSION', '1.1.0')
@@ -17,37 +22,29 @@ DATETIME_ISO8601_FULL_MASK = '%Y-%m-%dT%H:%M:%SZ'
 DATETIME_ISO8601_SIMPLE_MASK = '%Y-%m-%d'
 DATETIME_HOUR_MASK = '%H:%M:%S'
 
+engine = create_engine(ERR_MAYA_DATABASE_URL)
 
-class User(mongoengine.EmbeddedDocument):
-    """Store Discord user information"""
-    person = mongoengine.StringField()
-    fullname = mongoengine.StringField()
-
-
-class Client(mongoengine.EmbeddedDocument):
-    """Store information about client used"""
-    name = mongoengine.StringField()
-    version = mongoengine.StringField()
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
+session = Session()
 
 
-class LiquidUnit(Enum):
-    """Units of liquid"""
-    ML = "ml"
-    L = "l"
+class LiquidModel(Base):
+    __tablename__ = 'liquids'
 
+    id = Column(UUID(as_uuid=True),
+                primary_key=True,
+                unique=True,
+                server_default=text("uuid_generate_v4()"),)
 
-class Liquid(mongoengine.Document):
-    """Liquid as base class"""
-
-    date = mongoengine.DateTimeField()
-    last_modification = mongoengine.DateTimeField()
-    quantity = mongoengine.IntField()
-    uuid = mongoengine.UUIDField()
-    active = mongoengine.BooleanField()
-    client = mongoengine.EmbeddedDocumentField(Client)
-    user = mongoengine.EmbeddedDocumentField(User)
-    unit = mongoengine.EnumField(LiquidUnit, default=LiquidUnit.ML)
-    type = mongoengine.StringField()
+    client_name = Column(String)
+    client_version = Column(String)
+    creation_date = Column(DateTime)
+    last_modification = Column(DateTime)
+    quantity = Column(Integer)
+    unit = Column(String)
+    type = Column(String)
+    username = Column(String)
 
 
 class MayaPlugin(BotPlugin):
@@ -75,24 +72,21 @@ class MayaPlugin(BotPlugin):
         else:
             now = datetime.datetime.utcnow()
 
-        mongoengine.connect(host=ERR_MAYA_MONGODB_URL,
-                            uuidRepresentation='standard')
-
-        found_docs = Liquid.objects(
-            type=liq_type,
-            date__gt=datetime.datetime(now.year, now.month, now.day, 0, 0, 0),
-            date__lt=datetime.datetime(now.year, now.month, now.day, 23, 59, 59))
+        query_filters = [
+            LiquidModel.creation_date > datetime.datetime(now.year, now.month, now.day, 0, 0, 0),
+            LiquidModel.creation_date < datetime.datetime(now.year, now.month, now.day, 23, 59, 59),
+            LiquidModel.type == liq_type
+        ]
+        liquids = LiquidModel().query.filter(*query_filters)
 
         liner = str()
         total = 0
-        for doc in found_docs:
-            date_str = doc.date.strftime(DATETIME_HOUR_MASK)
-            liner += date_str + "    " + str(doc.quantity) + "\n"
-            total += doc.quantity
+        for liquid in liquids:
+            date_str = liquid.creation_date.strftime(DATETIME_HOUR_MASK)
+            liner += date_str + "    " + str(liquid.quantity) + "\n"
+            total += liquid.quantity
 
         liner += "\nTotal " + str(total)
-
-        mongoengine.disconnect()
 
         return liner
 
@@ -123,35 +117,23 @@ class MayaPlugin(BotPlugin):
         else:
             now = datetime.datetime.utcnow()
 
-        mongoengine.connect(host=ERR_MAYA_MONGODB_URL,
-                            uuidRepresentation='standard')
+        liquid = LiquidModel(
+            id = uuid.uuid4(),
+            client_name = ERR_MAYA_CLIENT_NAME,
+            client_version = ERR_MAYA_CLIENT_VERSION,
+            creation_date = now,
+            last_modification = now,
+            quantity = value,
+            unit = 'ml',
+            type = liq_type,
+            username = msg.frm.fullname
+        )
 
-        liquid = Liquid()
-        liquid.uuid = uuid.uuid4()
-        liquid.quantity = value
-        liquid.unit = LiquidUnit.ML
-        liquid.date = now
-        liquid.last_modification = now
-        liquid.type = liq_type
+        session.add(liquid)
+        session.commit()
 
-        client = Client()
-        client.name = ERR_MAYA_CLIENT_NAME
-        client.version = ERR_MAYA_CLIENT_VERSION
-        liquid.client = client
-
-        user_info = msg.frm
-        user = User()
-        user.person = user_info.person
-        user.fullname = user_info.fullname
-        liquid.user = user
-
-        liquid.save()
-
-        mongoengine.disconnect()
-
-        unit = LiquidUnit.ML.value
-        uuid_str = liquid.uuid
-        return f"{value}{unit} of {liq_type} was drunk. ({uuid_str})"
+        uuid_str = liquid.id
+        return f"{value}ml of {liq_type} was drunk. ({uuid_str})"
 
     @botcmd(split_args_with=None)
     def maya_liquid_remove(self, msg, args):
@@ -172,20 +154,15 @@ class MayaPlugin(BotPlugin):
 
             return "Please use a valid UUID"
 
-        mongoengine.connect(host=ERR_MAYA_MONGODB_URL,
-                            uuidRepresentation='standard')
-
-        found_doc = Liquid.objects(uuid=uuid_instance).first()
-        if found_doc is None:
-            mongoengine.disconnect()
+        found = session.query(LiquidModel).get(uuid_instance)
+        if found is None:
             return f"UUID {value} to {liq_type} not found"
 
-        fnd_uuid = found_doc.uuid
-        if str(fnd_uuid) != value:
-            mongoengine.disconnect()
-            return f"UUID mismatch between {fnd_uuid} (database) and  {value} (input)"
+        found_id = found.id
+        if str(found_id) != value:
+            return f"UUID mismatch between {found_id} (database) and {value} (input)"
 
-        found_doc.delete()
-        mongoengine.disconnect()
+        session.delete(found)
+        session.commit()
 
         return f"{value} was removed."
