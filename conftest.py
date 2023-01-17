@@ -11,7 +11,7 @@ def pytest_runtest_setup(item):
 
 CREATE TABLE IF NOT EXISTS
   public.liquids (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     client_name character varying NULL,
     client_version character varying NULL,
     creation_date timestamp without time zone NULL,
@@ -20,12 +20,7 @@ CREATE TABLE IF NOT EXISTS
     unit character varying NULL,
     type character varying NULL,
     username character varying NULL
-  );
-
-ALTER TABLE
-  public.liquids
-ADD
-  CONSTRAINT liquids_pkey PRIMARY KEY (id);""")
+  );""")
     results = engine.execute(sql)
 
     sql = text('TRUNCATE liquids;')
