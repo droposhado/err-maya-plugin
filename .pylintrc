@@ -79,6 +79,7 @@ confidence=
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 disable=too-many-instance-attributes, # remove warning by Coffee and Water class
+        R0903,
         unused-argument # msg not is used, only args
 
 # Enable the message, report, category or checker with the given id(s). You can

@@ -1,16 +1,14 @@
 """Configuration file to pytest tests"""
-import datetime
 import os
-import uuid
 
-from errbot import BotPlugin, botcmd
 from sqlalchemy import Column, DateTime, Integer, String, create_engine, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 ERR_MAYA_DATABASE_URL = os.getenv('ERR_MAYA_DATABASE_URL',
                                   'postgresql://maya:maya@localhost:5432/maya')
+
+Base = declarative_base()
 
 
 class LiquidModel(Base):
