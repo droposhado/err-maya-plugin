@@ -1,6 +1,7 @@
 """Configuration file to pytest tests"""
-from model import engine
 from sqlalchemy import text
+
+from model import engine
 
 
 def pytest_runtest_setup(item):
