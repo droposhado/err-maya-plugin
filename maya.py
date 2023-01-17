@@ -4,13 +4,9 @@ import os
 import uuid
 
 from errbot import BotPlugin, botcmd
-from sqlalchemy import Column, DateTime, Integer, String, create_engine, text
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-ERR_MAYA_DATABASE_URL = os.getenv('ERR_MAYA_DATABASE_URL',
-                                  'postgresql://maya:maya@localhost:5432/maya')
+from model import engine, LiquidModel
 
 ERR_MAYA_CLIENT_NAME = os.getenv('ERR_MAYA_CLIENT_NAME', 'err-maya-plugin')
 ERR_MAYA_CLIENT_VERSION = os.getenv('ERR_MAYA_CLIENT_VERSION', '1.1.0')
@@ -19,31 +15,8 @@ DATETIME_ISO8601_FULL_MASK = '%Y-%m-%dT%H:%M:%SZ'
 DATETIME_ISO8601_SIMPLE_MASK = '%Y-%m-%d'
 DATETIME_HOUR_MASK = '%H:%M:%S'
 
-engine = create_engine(ERR_MAYA_DATABASE_URL)
-
-Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
-
-
-class LiquidModel(Base):
-    """Represent database model liquid"""
-
-    __tablename__ = 'liquids'
-
-    id = Column(UUID(as_uuid=True),
-                primary_key=True,
-                unique=True,
-                server_default=text("uuid_generate_v4()"),)
-
-    client_name = Column(String)
-    client_version = Column(String)
-    creation_date = Column(DateTime)
-    last_modification = Column(DateTime)
-    quantity = Column(Integer)
-    unit = Column(String)
-    type = Column(String)
-    username = Column(String)
 
 
 class MayaPlugin(BotPlugin):
