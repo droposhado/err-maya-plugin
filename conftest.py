@@ -7,7 +7,9 @@ from model import engine
 def pytest_runtest_setup(item):
     """Cleanup tables before start a new test"""
 
-    sql = text("""CREATE TABLE IF NOT EXISTS
+    sql = text("""CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS
   public.liquids (
     id uuid NOT NULL DEFAULT uuid_generate_v4(),
     client_name character varying NULL,
@@ -25,7 +27,6 @@ ALTER TABLE
 ADD
   CONSTRAINT liquids_pkey PRIMARY KEY (id);""")
     results = engine.execute(sql)
-
 
     sql = text('TRUNCATE liquids;')
     results = engine.execute(sql)
