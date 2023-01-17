@@ -3,14 +3,11 @@ import datetime
 import os
 import uuid
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-
 from errbot import BotPlugin, botcmd
-
+from sqlalchemy import Column, DateTime, Integer, String, create_engine, text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 ERR_MAYA_DATABASE_URL = os.getenv('ERR_MAYA_DATABASE_URL',
                                   'postgresql://maya:maya@localhost:5432/maya')
@@ -30,6 +27,8 @@ session = Session()
 
 
 class LiquidModel(Base):
+    """Represent database model liquid"""
+
     __tablename__ = 'liquids'
 
     id = Column(UUID(as_uuid=True),
@@ -65,7 +64,8 @@ class MayaPlugin(BotPlugin):
 
         if len(args) == 2:
             try:
-                now = datetime.datetime.strptime(args[1], DATETIME_ISO8601_SIMPLE_MASK)
+                now = datetime.datetime.strptime(args[1],
+                                                 DATETIME_ISO8601_SIMPLE_MASK)
             except ValueError:
                 return "Please use a valid datetime in ISO8601 (YYYY-MM-DD)"
 
@@ -73,8 +73,12 @@ class MayaPlugin(BotPlugin):
             now = datetime.datetime.utcnow()
 
         query_filters = [
-            LiquidModel.creation_date > datetime.datetime(now.year, now.month, now.day, 0, 0, 0),
-            LiquidModel.creation_date < datetime.datetime(now.year, now.month, now.day, 23, 59, 59),
+            LiquidModel.creation_date > datetime.datetime(now.year,
+                                                          now.month,
+                                                          now.day, 0, 0, 0),
+            LiquidModel.creation_date < datetime.datetime(now.year,
+                                                          now.month,
+                                                          now.day, 23, 59, 59),
             LiquidModel.type == liq_type
         ]
         liquids = LiquidModel().query.filter(*query_filters)
@@ -110,7 +114,8 @@ class MayaPlugin(BotPlugin):
 
         if len(args) == 3:
             try:
-                now = datetime.datetime.strptime(args[2], DATETIME_ISO8601_FULL_MASK)
+                now = datetime.datetime.strptime(args[2],
+                                                 DATETIME_ISO8601_FULL_MASK)
             except ValueError:
                 return "Please use a valid datetime in ISO8601 (YYYY-MM-DDTHH:MM:SSZ)"
 
@@ -118,15 +123,15 @@ class MayaPlugin(BotPlugin):
             now = datetime.datetime.utcnow()
 
         liquid = LiquidModel(
-            id = uuid.uuid4(),
-            client_name = ERR_MAYA_CLIENT_NAME,
-            client_version = ERR_MAYA_CLIENT_VERSION,
-            creation_date = now,
-            last_modification = now,
-            quantity = value,
-            unit = 'ml',
-            type = liq_type,
-            username = msg.frm.fullname
+            id=uuid.uuid4(),
+            client_name=ERR_MAYA_CLIENT_NAME,
+            client_version=ERR_MAYA_CLIENT_VERSION,
+            creation_date=now,
+            last_modification=now,
+            quantity=value,
+            unit='ml',
+            type=liq_type,
+            username=msg.frm.fullname
         )
 
         session.add(liquid)
