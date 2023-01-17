@@ -24,6 +24,8 @@ ALTER TABLE
   public.liquids
 ADD
   CONSTRAINT liquids_pkey PRIMARY KEY (id);""")
+    results = engine.execute(sql)
+
 
     sql = text('TRUNCATE liquids;')
     results = engine.execute(sql)
