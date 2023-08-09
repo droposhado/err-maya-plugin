@@ -21,7 +21,7 @@ class LiquidModel(Base):
     id = Column(UUID(as_uuid=True),
                 primary_key=True,
                 unique=True,
-                server_default=text("uuid_generate_v4()"),)
+                server_default=text("gen_random_uuid()"),)
 
     client_name = Column(String)
     client_version = Column(String)

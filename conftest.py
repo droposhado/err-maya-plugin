@@ -7,11 +7,9 @@ from model import engine
 def pytest_runtest_setup(item):
     """Cleanup tables before start a new test"""
 
-    sql = text("""CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-CREATE TABLE IF NOT EXISTS
+    sql = text("""CREATE TABLE IF NOT EXISTS
   public.liquids (
-    id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     client_name character varying NULL,
     client_version character varying NULL,
     creation_date timestamp without time zone NULL,
